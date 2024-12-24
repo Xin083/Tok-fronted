@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import BaseMusic from '../BaseMusic.vue'
-import { _formatNumber, cloneDeep } from '@/utils'
+import { _checkImgUrl, _formatNumber, cloneDeep } from '@/utils'
 import bus, { EVENT_KEY } from '@/utils/bus'
 import { Icon } from '@iconify/vue'
 import { useClick } from '@/utils/hooks/useClick'
 import { inject } from 'vue'
+import { videoCollect, videoDigg } from '@/api/videos'
+import { userAttention } from '@/api/user'
 
 const props = defineProps({
   isMy: {
@@ -32,43 +34,101 @@ function _updateItem(props, key, val) {
   bus.emit(EVENT_KEY.UPDATE_ITEM, { position: position.value, item: old })
 }
 
-function loved() {
-  setTimeout(() => {
-    _updateItem(props, 'isLoved', !props.item.isLoved)
-  }, 100)
-  if (!props.item.isLoved) {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.item.statistics.digg_count++
-  } else {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.item.statistics.digg_count--
+async function loved() {
+  // 切换当前点赞状态
+  try {
+    // 调用点赞 API，传入 videoId 和新状态
+    console.log('aweme_id:', props)
+    const res = await videoDigg(
+      {},
+      {
+        aweme_id: props.item.aweme_id,
+        action: !props.item.isLoved
+      }
+    )
+    if (res.success) {
+      // 更新 isLoved 状态
+      setTimeout(() => {
+        _updateItem(props, 'isLoved', !props.item.isLoved)
+      }, 100)
+      // 更新点赞数量
+      if (!props.item.isLoved) {
+        // eslint-disable-next-line vue/no-mutating-props
+        props.item.statistics.digg_count++
+      } else {
+        // eslint-disable-next-line vue/no-mutating-props
+        props.item.statistics.digg_count--
+      }
+    } else {
+      console.error('点赞请求失败:', res.data.msg)
+    }
+  } catch (error) {
+    console.error('点赞时出现错误:', error)
   }
 }
 
-function collected() {
-  setTimeout(() => {
-    _updateItem(props, 'isCollect', !props.item.isCollect)
-  }, 100)
-  if (!props.item.isCollect) {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.item.statistics.collect_count++
-  } else {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.item.statistics.collect_count--
+async function collecte() {
+  // 切换当前收藏状态
+  try {
+    // 调用点赞 API，传入 videoId 和新状态
+    console.log('aweme_id:', props)
+    const res = await videoCollect(
+      {},
+      {
+        aweme_id: props.item.aweme_id,
+        action: !props.item.isCollect
+      }
+    )
+    if (res.success) {
+      // 更新 isCollect 状态
+      setTimeout(() => {
+        _updateItem(props, 'isCollect', !props.item.isCollect)
+      }, 100)
+      if (!props.item.isCollect) {
+        // eslint-disable-next-line vue/no-mutating-props
+        props.item.statistics.collect_count++
+      } else {
+        // eslint-disable-next-line vue/no-mutating-props
+        props.item.statistics.collect_count--
+      }
+    } else {
+      console.error('收藏失败:', res.data.msg)
+    }
+  } catch (error) {
+    console.error('收藏时出现错误:', error)
   }
 }
 
-function attention(e) {
+async function attention(e) {
+  console.log('关注', props.item)
   e.currentTarget.classList.add('attention')
-  setTimeout(() => {
-    _updateItem(props, 'isAttention', true)
-  }, 1000)
+
+  // 切换当前关注状态
+  try {
+    // 调用点赞 API，传入 videoId 和新状态
+    const res = await userAttention(
+      {},
+      {
+        following_id: String(props.item.author.uid),
+        action: !props.item.isAttention
+      }
+    )
+    if (res.success) {
+      // 更新 isAttention 状态
+      setTimeout(() => {
+        _updateItem(props, 'isAttention', !props.item.isAttention)
+      }, 1000)
+    } else {
+      console.error('关注失败:', res.data.msg)
+    }
+  } catch (error) {
+    console.error('关注时出现错误:', error)
+  }
 }
 
 function showComments() {
   bus.emit(EVENT_KEY.OPEN_COMMENTS, props.item.aweme_id)
 }
-
 const vClick = useClick()
 </script>
 
@@ -77,7 +137,7 @@ const vClick = useClick()
     <div class="avatar-ctn mb2r">
       <img
         class="avatar"
-        :src="item.author.avatar_168x168.url_list[0]"
+        :src="_checkImgUrl(item.author.avatar_small)"
         alt=""
         v-click="() => bus.emit(EVENT_KEY.GO_USERINFO)"
       />
@@ -100,7 +160,7 @@ const vClick = useClick()
       <span>{{ _formatNumber(item.statistics.comment_count) }}</span>
     </div>
     <!--TODO     -->
-    <div class="message mb2r" v-click="collected">
+    <div class="message mb2r" v-click="collecte">
       <Icon
         v-if="item.isCollect"
         icon="ic:round-star"

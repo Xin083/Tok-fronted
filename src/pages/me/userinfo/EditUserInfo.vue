@@ -11,7 +11,7 @@
     <div class="userinfo">
       <div class="change-avatar">
         <div class="avatar-ctn" @click="showAvatarDialog">
-          <img class="avatar" :src="_checkImgUrl(store.userinfo.cover_url[0].url_list[0])" alt="" />
+          <img class="avatar" :src="_checkImgUrl(store.userinfo.avatar_small)" alt="" />
           <img class="change" src="../../../assets/img/icon/me/camera-light.png" alt="" />
         </div>
         <span>点击更换头像</span>
@@ -47,7 +47,7 @@
       <div class="row" @click="showBirthdayDialog">
         <div class="left">生日</div>
         <div class="right">
-          <span>{{ isEmpty(store.userinfo.user_age) }}</span>
+          <span>{{ isEmpty(store.userinfo.birthday) }}</span>
           <div v-show="false" id="trigger1"></div>
           <dy-back scale=".8" direction="right"></dy-back>
         </div>
@@ -75,9 +75,15 @@
       <div class="preview-img" v-if="data.previewImg" @click="data.previewImg = ''">
         <img class="resource" :src="data.previewImg" alt="" />
         <img
+          class="upload"
+          src="@/assets/img/icon/components/video/upload.png"
+          alt="Upload"
+          @click.stop="_no"
+        />
+        <img
           class="download"
-          src="../../../assets/img/icon/components/video/download.png"
-          alt=""
+          src="@/assets/img/icon/components/video/download.png"
+          alt="Download"
           @click.stop="_no"
         />
       </div>
@@ -93,12 +99,15 @@ import {
   _getUserDouyinId,
   _hideLoading,
   _no,
+  _notice,
   _showLoading,
   _showSelectDialog,
   _sleep
 } from '@/utils'
 import { computed, reactive } from 'vue'
 import { useNav } from '@/utils/hooks/useNav'
+import { updateInfo } from '@/api/user'
+import { uploadAvatar } from '@/api/upload'
 
 defineOptions({
   name: 'EditUserInfo'
@@ -109,11 +118,11 @@ const data = reactive({
   sexList: [
     { id: 1, name: '男' },
     { id: 2, name: '女' },
-    { id: 3, name: '不展示' }
+    { id: 0, name: '不展示' }
   ],
   avatarList: [
     { id: 1, name: '拍一张' },
-    { id: 2, name: '从相册选择' },
+    { id: 2, name: '从本地选择' },
     { id: 3, name: '查看大图' },
     { id: 4, name: '取消' }
   ],
@@ -140,6 +149,16 @@ function showSexDialog() {
   _showSelectDialog(data.sexList, async (e) => {
     _showLoading()
     await _sleep(500)
+    const res = await updateInfo(
+      {},
+      {
+        operation_type: 4,
+        data: String(e.id)
+      }
+    )
+    if (res.success) {
+      _notice('修改成功!')
+    }
     store.setUserinfo({ ...store.userinfo, gender: e.id })
     _hideLoading()
   })
@@ -150,12 +169,30 @@ function showAvatarDialog() {
     switch (e.id) {
       case 1:
       case 2:
-        return _no()
+        // 触发文件选择器
+        triggerFileUpload()
+        break
       case 3:
-        data.previewImg = _checkImgUrl(store.userinfo.cover_url[0].url_list[0])
+        data.previewImg = _checkImgUrl(store.userinfo.avatar_large)
         break
     }
   })
+}
+
+// 触发文件选择器并上传文件
+function triggerFileUpload() {
+  const fileInput = document.createElement('input')
+  fileInput.type = 'file'
+  fileInput.accept = 'image/*' // 仅接受图片类型
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0]
+    console.log('ok')
+    const res = await uploadAvatar(file)
+    if (res.success) {
+      console.log('ok')
+    }
+  }
+  fileInput.click()
 }
 
 function showBirthdayDialog() {
@@ -176,14 +213,54 @@ function showBirthdayDialog() {
     ],
     callback: async (indexArr, data) => {
       _showLoading()
-      await _sleep(500)
-      store.setUserinfo({
-        ...store.userinfo,
-        birthday: data.join('-')
-      })
+      const date = new Date(
+        parseInt(data[0]), // 年
+        parseInt(data[1]) - 1, // 月（JavaScript 中的月份是从 0 开始的）
+        parseInt(data[2]) // 日
+      )
+      const unixTimestamp = Math.floor(date.getTime() / 1000)
+      const res = await updateInfo(
+        {},
+        {
+          operation_type: 5,
+          data: String(unixTimestamp)
+        }
+      )
+      if (res.success) {
+        _notice('修改成功!')
+        store.setUserinfo({
+          ...store.userinfo,
+          birthday: data.join('-')
+        })
+        store.setUserinfo({
+          ...store.userinfo,
+          user_age: calculateAge(unixTimestamp)
+        })
+      }
       _hideLoading()
     }
   }).show()
+}
+
+function calculateAge(unixTimestamp) {
+  // 将 UNIX 时间戳转换为 Date 对象
+  const birthDate = new Date(unixTimestamp * 1000)
+
+  // 获取当前日期
+  const now = new Date()
+
+  // 计算年龄
+  let age = now.getFullYear() - birthDate.getFullYear()
+
+  // 如果当前月份和日期还未到出生月份和日期，则年龄减一
+  if (
+    now.getMonth() < birthDate.getMonth() ||
+    (now.getMonth() === birthDate.getMonth() && now.getDate() < birthDate.getDate())
+  ) {
+    age--
+  }
+
+  return age
 }
 </script>
 
@@ -224,9 +301,16 @@ function showBirthdayDialog() {
 
   .resource {
     width: 100%;
-    max-height: %;
+    max-height: 100%;
   }
-
+  .upload {
+    position: absolute;
+    bottom: 20rem;
+    left: 20rem;
+    padding: 3rem;
+    background: var(--second-btn-color-tran);
+    width: 20rem;
+  }
   .download {
     position: absolute;
     bottom: 20rem;

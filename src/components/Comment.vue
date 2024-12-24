@@ -139,10 +139,10 @@
               <img
                 :style="item.select ? 'opacity: .5;' : ''"
                 class="avatar"
-                :src="_checkImgUrl(item.avatar)"
+                :src="_checkImgUrl(item.avatar_small['url_list'][0])"
                 alt=""
               />
-              <span>{{ item.name }}</span>
+              <span>{{ item.nickname }}</span>
               <img
                 v-if="item.select"
                 class="checked"
@@ -160,7 +160,7 @@
               <img src="../assets/img/icon/message/emoji-black.png" @click="_no" />
             </div>
           </div>
-          <img v-if="comment" src="../assets/img/icon/message/up.png" @click="send" />
+          <img v-if="comment" src="../assets/img/icon/message/up.png" @click="send(item)" />
         </div>
       </div>
       <ConfirmDialog title="私信给" ok-text="发送" v-model:visible="showPrivateChat">
@@ -187,7 +187,7 @@ import {
   sampleSize
 } from '@/utils'
 import { useBaseStore } from '@/store/pinia'
-import { videoComments } from '@/api/videos'
+import { videoComment, videoComments } from '@/api/videos'
 
 export default {
   name: 'Comment',
@@ -203,6 +203,12 @@ export default {
       type: Boolean,
       default() {
         return false
+      }
+    },
+    item: {
+      type: Object,
+      default: () => {
+        return {}
       }
     },
     videoId: {
@@ -273,7 +279,7 @@ export default {
         item.showChildren = true
       }
     },
-    send() {
+    async send(item) {
       if (!this.comment.trim()) {
         return // 如果评论内容为空，直接返回
       }
@@ -282,29 +288,51 @@ export default {
         ip_location: baseStore.userinfo.ip_location,
         aweme_id: this.videoId,
         content: this.comment,
-        create_time: Date.now(),
         uid: String(baseStore.userinfo.uid),
         short_id: String(baseStore.userinfo.short_id),
         unique_id: baseStore.userinfo.unique_id,
         signature: baseStore.userinfo.signature,
         nickname: baseStore.userinfo.nickname,
-        avatar: baseStore.userinfo.avatar_168x168['url_list'][0]
+        avatar: baseStore.userinfo.avatar_small['url_list'][0]
         // 其他必要的字段可以根据你的需求添加
       }
-      // this.$props.item.statistics.comment_count++
-      // _updateItem(this.$props, 'isLoved', !props.item.isLoved)
-      this.comments.unshift(commentData)
-      this.comment = ''
-      this.isCall = false
-      this.resetSelectStatus()
+
+      try {
+        const response = await videoComment({}, commentData)
+        if (response.success) {
+          console.log(this.$props)
+          this.comments.unshift({
+            id: response.data.id || '2', // Use the ID from the response if available
+            avatar: baseStore.userinfo.avatar_small['url_list'][0],
+            nickname: baseStore.userinfo.nickname,
+            content: this.comment,
+            ip_location: baseStore.userinfo.ip_location,
+            loveNum: 27,
+            isLoved: false,
+            create_time: Date.now().toString(), // Use the current time
+            children: []
+          })
+          setTimeout(() => {
+            item.statistics.comment_count++
+          }, 100)
+          this.comment = '' // Clear the input after sending
+          this.isCall = false
+          this.resetSelectStatus()
+        }
+      } catch (error) {
+        console.error('Error sending comment:', error)
+      }
     },
     async getData() {
-      let res: any = await videoComments({ id: this.videoId })
+      let res: any = await videoComments({ aweme_id: this.videoId })
+      console.log('comments:', res.data)
       if (res.success) {
-        res.data.map((v) => {
-          v.showChildren = false
-          v.digg_count = Number(v.digg_count)
-        })
+        if (res.data.length > 0) {
+          res.data.map((v) => {
+            v.showChildren = false
+            v.digg_count = Number(v.digg_count)
+          })
+        }
         this.comments = res.data
       }
     },
@@ -314,11 +342,11 @@ export default {
     },
     toggleCall(item) {
       item.select = !item.select
-      let name = item.name
-      if (this.comment.includes('@' + name)) {
-        this.comment = this.comment.replace(`@${name} `, '')
+      let nickname = item.nickname
+      if (this.comment.includes('@' + nickname)) {
+        this.comment = this.comment.replace(`@${nickname} `, '')
       } else {
-        this.comment += `@${name} `
+        this.comment += `@${nickname} `
       }
     },
     loved(row) {

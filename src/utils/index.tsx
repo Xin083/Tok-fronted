@@ -46,7 +46,7 @@ export function _copy(val) {
 }
 
 export function _formatNumber(num) {
-  if (!num) return
+  // if (!num) return
   if (num > 100000000) {
     return (num / 100000000).toFixed(1) + '亿'
   } else if (num > 10000) {
@@ -118,8 +118,7 @@ export function _time(time) {
   }
   return str
 }
-
-export function _checkImgUrl(url) {
+export function _checkLocalImgUrl(url) {
   // console.log(url)
   if (!url) return
   //本地图片
@@ -133,6 +132,43 @@ export function _checkImgUrl(url) {
     return url
   }
   return IMG_URL + url
+}
+export function _checkImgUrl(cover) {
+  const DEFAULT_IMG = '/assets/img/header-bg.png' // 默认图片路径
+
+  // 检查 cover 是否有效
+  if (!cover) return DEFAULT_IMG
+
+  // 如果 cover 是字符串（单一 URL）
+  if (typeof cover === 'string') {
+    return _validateUrl(cover) ? cover : DEFAULT_IMG
+  }
+
+  // 如果 cover 是对象或数组
+  if (Array.isArray(cover)) {
+    // 优先使用第一个 URL
+    return cover.length > 0 && _validateUrl(cover[0]?.url_list?.[0])
+      ? cover[0].url_list[0]
+      : DEFAULT_IMG
+  } else if (typeof cover === 'object' && cover.url_list) {
+    return _validateUrl(cover.url_list[0]) ? cover.url_list[0] : DEFAULT_IMG
+  }
+
+  return DEFAULT_IMG // 默认图片
+}
+
+// 辅助函数：检查 URL 是否有效
+function _validateUrl(url) {
+  if (
+    url.includes('assets/img') ||
+    url.includes('file://') ||
+    url.includes('data:image') ||
+    url.includes('http') ||
+    url.includes('https')
+  ) {
+    return true
+  }
+  if (!url || typeof url !== 'string') return false
 }
 
 export function _duration(v) {

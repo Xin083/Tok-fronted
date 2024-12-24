@@ -17,13 +17,18 @@
         <SlideItem style="width: 20vw" @click="activeIndex = 3">
           <span :class="activeIndex + 2 === 5 ? 'active' : ''">开直播</span>
         </SlideItem>
+        <SlideItem style="width: 25vw" @click="goToUploadPage">
+          <span :class="activeIndex + 2 === 6 ? 'active' : ''">上传本地</span>
+        </SlideItem>
+        <SlideItem style="width: 20vw"></SlideItem>
+        <SlideItem style="width: 20vw"></SlideItem>
       </SlideHorizontal>
     </div>
     <div class="float">
       <Icon class="close" icon="mingcute:close-line" @click="router.back()" />
       <div class="choose-music">
         <Icon icon="vaadin:music" />
-        <span>选择音乐</span>
+        <span @click="_no()">选择音乐</span>
       </div>
       <div class="toolbar">
         <div class="tool" @click.stop="$emit('showComments')">
@@ -51,6 +56,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { _no } from '@/utils'
 
 defineOptions({
   name: 'Publish'
@@ -96,7 +102,10 @@ function getMedia() {
     console.log('e', e)
   }
 }
-
+// 跳转到上传页面
+function goToUploadPage() {
+  router.push('/upload') // 替换为目标页面路径
+}
 onMounted(() => {
   videoEl.value = document.getElementById('video')
   getMedia()

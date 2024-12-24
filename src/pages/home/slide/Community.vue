@@ -12,7 +12,7 @@
         <WaterfallList :list="list" class="list">
           <template v-slot="{ item }">
             <div class="card" @click="(e) => showDetail(e, item)">
-              <img class="poster" v-lazy="_checkImgUrl(item.note_card?.cover?.url_default)" />
+              <img class="poster" v-lazy="_checkLocalImgUrl(item.note_card?.cover?.url_default)" />
               <div class="bottom">
                 <div class="title">
                   {{ item.note_card?.display_title }}
@@ -47,8 +47,8 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
-import { _checkImgUrl, _no, _stopPropagation, cloneDeep } from '@/utils'
-import { recommendedPost } from '@/api/user'
+import { _checkImgUrl, _checkLocalImgUrl, _no, _stopPropagation, cloneDeep } from '@/utils'
+import { recommendedPost } from '@/api/post'
 import { useNav } from '@/utils/hooks/useNav'
 import { Icon } from '@iconify/vue'
 import WaterfallList from '@/components/WaterfallList.vue'

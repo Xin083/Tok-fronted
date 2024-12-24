@@ -12,7 +12,7 @@
     <div class="content">
       <div class="qrcode">
         <img class="qrcode-bg" src="../../assets/img/icon/me/code-bg.png" alt="" />
-        <img class="avatar" :src="_checkImgUrl(store.userinfo.cover_url[0].url_list[0])" alt="" />
+        <img class="avatar" :src="_checkImgUrl(store.userinfo.cover_url)" alt="" />
       </div>
 
       <span class="name">ZZZZZZZZZZ</span>

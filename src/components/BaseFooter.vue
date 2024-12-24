@@ -15,7 +15,7 @@
     </div>
     <div class="l-button" @click="tab(4)">
       <span :class="{ active: currentTab === 4 }">消息</span>
-      <div class="badge">2</div>
+      <div class="badge">10</div>
     </div>
     <div class="l-button" @click="tab(5)">
       <span :class="{ active: currentTab === 5 }">我</span>
@@ -53,7 +53,7 @@ export default {
     tab(index) {
       switch (index) {
         case 1:
-          this.$nav('/')
+          this.$nav('/home')
           break
         case 2:
           this.$nav('/shop')

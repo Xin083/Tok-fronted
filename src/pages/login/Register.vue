@@ -1,22 +1,22 @@
 <template>
-  <div class="PasswordLogin">
+  <div class="PasswordRegister">
     <BaseHeader mode="light" backMode="dark" backImg="back">
       <template v-slot:right>
-        <span class="f14" @click="$router.push('/login/help')">帮助与设置</span>
+        <span class="f14" @click="$router.push('/register/help')">帮助与设置</span>
       </template>
     </BaseHeader>
     <div class="content">
       <div class="desc">
-        <div class="title">手机号密码登录</div>
+        <div class="title">手机号注册</div>
       </div>
 
       <LoginInput autofocus type="phone" v-model="phone" placeholder="请输入手机号" />
+      <LoginInput class="mt1r" type="password" v-model="password" placeholder="请输入密码" />
       <LoginInput
-        autofocus
         class="mt1r"
         type="password"
-        v-model="password"
-        placeholder="请输入密码"
+        v-model="confirmPassword"
+        placeholder="请再次输入密码"
       />
 
       <div class="protocol" :class="showAnim ? 'anim-bounce' : ''">
@@ -35,7 +35,6 @@
           <span class="link" @click="$router.push('/service-protocol', { type: '“抖音”隐私政策' })"
             >隐私政策</span
           >
-          ，同时登录并使用抖音火山版（原“火山小视频”）和抖音
         </div>
       </div>
 
@@ -48,18 +47,10 @@
         :loading="loading"
         :active="false"
         :disabled="disabled"
-        @click="login"
+        @click="register"
       >
-        {{ loading ? '登录中' : '登录' }}
+        {{ loading ? '注册中' : '注册' }}
       </dy-button>
-
-      <div class="options">
-        <span>
-          忘记了？<span class="link" @click="$router.push('/login/retrieve-password')"
-            >找回密码</span
-          >
-        </span>
-      </div>
     </div>
   </div>
 </template>
@@ -68,14 +59,11 @@ import Check from '../../components/Check'
 import LoginInput from './components/LoginInput'
 import Tooltip from './components/Tooltip'
 import Base from './Base'
-import { login } from '@/api/base'
-import { useBaseStore, useChatStore } from '@/store/pinia'
-
-const baseStore = useBaseStore()
-const chatStore = useChatStore()
+import { register } from '@/api/base'
+import { _notice } from '@/utils/index'
 
 export default {
-  name: 'PasswordLogin',
+  name: 'PasswordRegister',
   extends: Base,
   components: {
     Check,
@@ -86,46 +74,48 @@ export default {
     return {
       phone: '',
       password: '',
-      code: '',
-      notice: ''
+      confirmPassword: '',
+      notice: '',
+      isAgree: false,
+      loading: false
     }
   },
   computed: {
     disabled() {
-      return !(this.phone && this.password)
+      return !(this.phone && this.password && this.confirmPassword && this.isAgree)
     }
   },
-  created() {},
   methods: {
-    async login() {
-      let isCheckPassed = await this.check() // 验证协议是否已勾选
-      if (!isCheckPassed) return
+    async register() {
+      if (this.password !== this.confirmPassword) {
+        _notice('两次输入的密码不一致')
+        return
+      }
+      if (!this.isAgree) {
+        _notice('请阅读并同意用户协议和隐私政策')
+        return
+      }
 
       this.loading = true
       try {
-        const res = await login(
+        const res = await register(
           {},
           {
             phone: this.phone,
             password: this.password
-            // 还可以补充其他字段
           }
         )
-        console.log('resss:', res.data)
-        if (res.data.isExist) {
-          // 登录成功后的处理逻辑，如存储 Token、跳转页面等
-          console.log('登录成功')
-          // 调用初始化方法
-          // await baseStore.init();
-          baseStore.setToken(res.data.token)
-          console.log('baseStore:', window.localStorage.getItem('token'))
-          baseStore.login_id = res.data.uid
-          // console.log("用户信息:", baseStore);
-          await baseStore.init()
-          await chatStore.init()
-          this.$router.push('/home') // 跳转到主页面
+        console.log('注册结果:', res.data)
+        if (res.success) {
+          // 注册成功后的处理逻辑，如跳转页面
+          setTimeout(() => {
+            _notice('注册成功!')
+          }, 200)
+          setTimeout(() => {
+            this.$router.push('/login/password') // 跳转到密码登录页面
+          }, 800) // 停留 1 秒
         } else {
-          this.notice = res.data.message || '登录失败'
+          _notice(res.msg)
         }
       } catch (error) {
         this.notice = '网络错误，请稍后再试'
@@ -136,12 +126,11 @@ export default {
   }
 }
 </script>
-
 <style scoped lang="less">
 @import '../../assets/less/index';
 @import 'Base.less';
 
-.PasswordLogin {
+.PasswordRegister {
   position: fixed;
   left: 0;
   right: 0;
@@ -166,22 +155,6 @@ export default {
         margin-bottom: 20rem;
         font-size: 20rem;
       }
-
-      .phone-number {
-        letter-spacing: 3rem;
-        font-size: 30rem;
-        margin-bottom: 10rem;
-      }
-
-      .sub-title {
-        font-size: 12rem;
-        color: var(--second-text-color);
-      }
-    }
-
-    .button {
-      width: 100%;
-      margin-bottom: 5rem;
     }
 
     .protocol {
@@ -195,11 +168,6 @@ export default {
         padding-top: 1rem;
         margin-right: 5rem;
       }
-    }
-    .options {
-      position: relative;
-      font-size: 14rem;
-      display: flex;
     }
   }
 }

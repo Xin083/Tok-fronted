@@ -50,15 +50,15 @@
             <header
               ref="header"
               :style="{
-                backgroundImage: `url(${_checkImgUrl(userinfo.cover_url[0].url_list[0])})`
+                backgroundImage: `url(${_checkImgUrl(userinfo.cover_url)})`
               }"
-              @click="previewImg = _checkImgUrl(userinfo.cover_url[0].url_list[0])"
+              @click="previewCover = _checkImgUrl(userinfo.cover_url)"
             >
               <div class="info">
                 <img
-                  :src="_checkImgUrl(userinfo.avatar_168x168.url_list[0])"
+                  :src="_checkImgUrl(userinfo.avatar_small)"
                   class="avatar"
-                  @click.stop="previewImg = _checkImgUrl(userinfo.avatar_300x300.url_list[0])"
+                  @click.stop="previewAvatar = _checkImgUrl(userinfo.avatar_large)"
                 />
                 <div class="right">
                   <p class="name">{{ userinfo.nickname }}</p>
@@ -345,17 +345,39 @@
       </SlideItem>
     </SlideRowList>
     <transition name="fade">
-      <div class="preview-img" v-if="previewImg" @click="previewImg = ''">
-        <img class="resource" :src="previewImg" alt="" />
+      <div class="preview-img" v-if="previewCover" @click="previewCover = ''">
+        <img class="resource" :src="previewCover" alt="" />
+        <img
+          class="upload"
+          src="@/assets/img/icon/components/video/upload.png"
+          alt="Upload"
+          @click.stop="upload_cover"
+        />
         <img
           class="download"
           src="@/assets/img/icon/components/video/download.png"
-          alt=""
+          alt="Download"
           @click.stop="_no"
         />
       </div>
     </transition>
-
+    <transition name="fade">
+      <div class="preview-img" v-if="previewAvatar" @click="previewAvatar = ''">
+        <img class="resource" :src="previewAvatar" alt="" />
+        <img
+          class="upload"
+          src="@/assets/img/icon/components/video/upload.png"
+          alt="Upload"
+          @click.stop="upload_avatar"
+        />
+        <img
+          class="download"
+          src="@/assets/img/icon/components/video/download.png"
+          alt="Download"
+          @click.stop="_no"
+        />
+      </div>
+    </transition>
     <ConfirmDialog
       v-model:visible="isShowStarCount"
       :subtitle="`&quot;${userinfo.nickname}&quot;共获得${_formatNumber(userinfo.aweme_count)}个赞`"
@@ -379,17 +401,19 @@ import { mapState } from 'pinia'
 import bus from '../../utils/bus'
 import ConfirmDialog from '../../components/dialog/ConfirmDialog'
 import { _checkImgUrl, _formatNumber, _getUserDouyinId, _no, _stopPropagation } from '@/utils'
-import { likeVideo, myVideo, privateVideo } from '@/api/videos'
+import { collectVideo, likeVideo, myVideo, privateVideo } from '@/api/videos'
 import { useBaseStore } from '@/store/pinia'
-import { userCollect } from '@/api/user'
 import SlideRowList from '@/components/slide/SlideRowList.vue'
+import upload from '@/pages/home/Upload.vue'
+import { uploadAvatar, uploadCover } from '@/api/upload'
 
 export default {
   name: 'Me',
   components: { SlideRowList, Posters, Indicator, ConfirmDialog },
   data() {
     return {
-      previewImg: '',
+      previewCover: '',
+      previewAvatar: '',
       contentIndex: 0,
       baseActiveIndex: 0,
       tabContents: [],
@@ -431,7 +455,8 @@ export default {
         collect: {
           video: {
             list: [],
-            total: -1
+            total: -1,
+            pageNo: 0
           },
           music: {
             list: [],
@@ -454,6 +479,9 @@ export default {
     }
   },
   computed: {
+    upload() {
+      return upload
+    },
     videoSlideRowListStyle() {
       return {
         height:
@@ -489,6 +517,36 @@ export default {
   },
   methods: {
     _no,
+    upload_cover() {
+      const fileInput = document.createElement('input')
+      fileInput.type = 'file'
+      fileInput.accept = 'image/*' // 仅接受图片类型
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0]
+        console.log('ok')
+        const res = await uploadCover(file)
+        if (res.success) {
+          console.log('ok')
+        }
+      }
+      fileInput.click()
+      this.$nav('/me')
+    },
+    upload_avatar() {
+      const fileInput = document.createElement('input')
+      fileInput.type = 'file'
+      fileInput.accept = 'image/*' // 仅接受图片类型
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0]
+        console.log('ok')
+        const res = await uploadAvatar(file)
+        if (res.success) {
+          console.log('ok')
+        }
+      }
+      fileInput.click()
+      this.$nav('/me')
+    },
     _getUserDouyinId,
     _checkImgUrl,
     _formatNumber,
@@ -539,8 +597,11 @@ export default {
       if (newVal === 3) {
         if (videoOb.video.total === -1) {
           this.loadings['loading' + newVal] = true
-          let res = await userCollect()
-          console.log('res', res)
+          let res = await collectVideo({
+            pageNo: this.videos.collect.video.pageNo,
+            pageSize: this.pageSize
+          })
+          console.log('res_coll', res)
           if (res.success) this.videos.collect = res.data
         }
       } else {
@@ -553,6 +614,7 @@ export default {
                 pageNo: this.videos.my.pageNo,
                 pageSize: this.pageSize
               })
+              console.log('res_my', res)
               if (res.success) this.videos.my = res.data
               break
             case 1:
@@ -610,24 +672,28 @@ export default {
               pageNo: videoOb.pageNo,
               pageSize: this.pageSize
             })
+            console.log('res:', res.data)
             break
           case 1:
             res = await privateVideo({
               pageNo: videoOb.pageNo,
               pageSize: this.pageSize
             })
+            console.log(res.data)
             break
           case 2:
             res = await likeVideo({
               pageNo: videoOb.pageNo,
               pageSize: this.pageSize
             })
+            console.log(res.data)
             break
           case 3:
-            res = await userCollect({
+            res = await collectVideo({
               pageNo: videoOb.pageNo,
               pageSize: this.pageSize
             })
+            console.log(res.data)
             break
         }
         this.loadings['loading' + this.contentIndex] = false

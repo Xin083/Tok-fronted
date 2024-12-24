@@ -75,6 +75,7 @@ import {
 } from '@/utils'
 import { computed, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { updateInfo } from '@/api/user'
 
 defineOptions({
   name: 'EditUserInfo'
@@ -86,17 +87,18 @@ const data = reactive({
   type: 1,
   localUserinfo: {
     nickname: '',
-    signature: '',
     unique_id: '',
+    signature: '',
     desc: ''
   }
 })
 const isChanged = computed(() => {
   if (data.type === 1) if (!data.localUserinfo.nickname) return false
-  if (data.type === 2) if (!data.localUserinfo.desc) return false
+  if (data.type === 2) if (!data.localUserinfo.unique_id) return false
+  if (data.type === 3) if (!data.localUserinfo.signature) return false
   if (store.userinfo.nickname !== data.localUserinfo.nickname) return true
-  if (store.userinfo.desc !== data.localUserinfo.desc) return true
-  return store.userinfo.unique_id !== data.localUserinfo.unique_id
+  if (store.userinfo.unique_id !== data.localUserinfo.unique_id) return true
+  return store.userinfo.signature !== data.localUserinfo.signature
 })
 
 onMounted(() => {
@@ -115,14 +117,55 @@ function back() {
 async function save() {
   if (!isChanged.value) return
   if (data.type === 1) {
-    if (!data.localUserinfo.nickname) return _notice('名字不能为空')
+    if (!data.localUserinfo.nickname) {
+      return _notice('名字不能为空')
+    }
+    const res = await updateInfo(
+      {},
+      {
+        operation_type: data.type,
+        data: data.localUserinfo.nickname
+      }
+    )
+    if (res.success) {
+      _notice('修改成功!')
+    }
+  }
+  if (data.type === 2) {
+    if (!data.localUserinfo.unique_id) {
+      return _notice('抖音号不能为空')
+    }
+    const res = await updateInfo(
+      {},
+      {
+        operation_type: data.type,
+        data: data.localUserinfo.unique_id
+      }
+    )
+    if (res.success) {
+      _notice('修改成功!')
+    }
+  }
+  if (data.type === 3) {
+    if (!data.localUserinfo.signature) {
+      return _notice('简介内容为空')
+    }
+    const res = await updateInfo(
+      {},
+      {
+        operation_type: data.type,
+        data: data.localUserinfo.signature
+      }
+    )
+    if (res.success) {
+      _notice('修改成功!')
+    }
   }
   _showLoading()
   store.setUserinfo(data.localUserinfo)
   await _sleep(500)
   _hideLoading()
   router.back()
-  if (data.type === 3) return _notice('新签名保存成功')
 }
 </script>
 

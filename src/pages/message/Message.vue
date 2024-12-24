@@ -11,14 +11,14 @@
         <div class="friends">
           <div
             class="friend"
-            @click="nav('/message/chat')"
+            @click="handleNavigation(item)"
             :key="index"
             v-for="(item, index) in store.friends.all"
           >
             <div class="avatar" :class="index % 2 === 0 ? 'on-line' : ''">
-              <img :src="_checkImgUrl(item.avatar)" alt="" />
+              <img :src="item.avatar_small['url_list'][0]" alt="" />
             </div>
-            <span>{{ item.name }}</span>
+            <span>{{ item.nickname }}</span>
           </div>
           <div class="friend">
             <div class="avatar">
@@ -63,26 +63,32 @@
             </div>
           </div>
           <!--      消息-->
-          <div class="message" @click="nav('/message/chat')">
+          <div
+            class="message"
+            v-for="user in data.users"
+            :key="user.uid"
+            @click="handleNavigation(user)"
+          >
             <div class="avatar on-line">
-              <img src="../../assets/img/icon/avatar/2.png" alt="" class="head-image" />
+              <img :src="_checkImgUrl(user.avatar_small.url_list[0])" alt="" class="head-image" />
             </div>
             <div class="content">
               <div class="left">
                 <div class="name">
-                  <span>{{ store.userinfo.nickname }}</span>
+                  <span>{{ user.nickname }}</span>
                 </div>
                 <div class="detail">
-                  哈哈哈哈哈哈
+                  {{ chatStore.all_messages[String(user.uid)]?.slice(-1)[0]?.msg_data || '-' }}
                   <div class="point"></div>
-                  10-10
+                  {{
+                    _time(chatStore.all_messages[String(user.uid)]?.slice(-1)[0]?.create_time) ||
+                    '-'
+                  }}
                 </div>
               </div>
               <div class="right">
-                <!--                          <div class="not-read"></div>-->
-                <!--                          <img class="camera" src="../../assets/img/icon/close-white.png" alt="">-->
-                <!--            <img class="arrow" src="../../assets/img/icon/close-white.png" alt="">-->
-                <div class="badge">2</div>
+                <!--                <div class="badge">{{ user.badge }}</div>-->
+                <div class="badge">{{ 2 }}</div>
               </div>
             </div>
           </div>
@@ -222,29 +228,29 @@
           <NoMore />
 
           <!--      模板-->
-          <!--      <div class="message">-->
-          <!--        <div class="avatar on-line">-->
-          <!--          <img src="../../assets/img/icon/avatar/2.png" alt="" class="head-image">-->
-          <!--        </div>-->
-          <!--        <div class="content">-->
-          <!--          <div class="left">-->
-          <!--            <div class="name">-->
-          <!--              <span>粉丝</span>-->
-          <!--              <span class="tag">官方</span>-->
-          <!--            </div>-->
-          <!--            <div class="detail">-->
-          <!--              <img class="sent" src="../../assets/img/icon/close-white.png" alt="">-->
-          <!--              已送达 ，sb，凌晨 01:15-->
-          <!--            </div>-->
-          <!--          </div>-->
-          <!--          <div class="right">-->
-          <!--            &lt;!&ndash;                          <div class="not-read"></div>&ndash;&gt;-->
-          <!--            &lt;!&ndash;                          <img class="camera" src="../../assets/img/icon/close-white.png" alt="">&ndash;&gt;-->
-          <!--            &lt;!&ndash;            <img class="arrow" src="../../assets/img/icon/close-white.png" alt="">&ndash;&gt;-->
-          <!--            <div class="badge">12</div>-->
-          <!--          </div>-->
-          <!--        </div>-->
-          <!--      </div>-->
+          <!--                <div class="message">-->
+          <!--                  <div class="avatar on-line">-->
+          <!--                    <img src="../../assets/img/icon/avatar/2.png" alt="" class="head-image">-->
+          <!--                  </div>-->
+          <!--                  <div class="content">-->
+          <!--                    <div class="left">-->
+          <!--                      <div class="name">-->
+          <!--                        <span>粉丝</span>-->
+          <!--                        <span class="tag">官方</span>-->
+          <!--                      </div>-->
+          <!--                      <div class="detail">-->
+          <!--                        <img class="sent" src="../../assets/img/icon/close-white.png" alt="">-->
+          <!--                        已送达 ，，凌晨 01:15-->
+          <!--                      </div>-->
+          <!--                    </div>-->
+          <!--                    <div class="right">-->
+          <!--                      &lt;!&ndash;                          <div class="not-read"></div>&ndash;&gt;-->
+          <!--                      &lt;!&ndash;                          <img class="camera" src="../../assets/img/icon/close-white.png" alt="">&ndash;&gt;-->
+          <!--                      &lt;!&ndash;            <img class="arrow" src="../../assets/img/icon/close-white.png" alt="">&ndash;&gt;-->
+          <!--                      <div class="badge">12</div>-->
+          <!--                    </div>-->
+          <!--                  </div>-->
+          <!--                </div>-->
         </div>
       </Scroll>
       <from-bottom-dialog page-id="Message" v-model="data.createChatDialog">
@@ -302,9 +308,9 @@
                 v-for="(item, i) in store.friends.all"
                 @click="item.select = !item.select"
               >
-                <img class="left" :src="_checkImgUrl(item.avatar)" alt="" />
+                <img class="left" :src="_checkImgUrl(item.avatar_small['url_list'][0])" alt="" />
                 <div class="right">
-                  <span>{{ item.name }}</span>
+                  <span>{{ item.nickname }}</span>
                   <Check mode="red" style="height: 20rem; width: 20rem" v-model="item.select" />
                 </div>
               </div>
@@ -429,17 +435,26 @@ import Check from '../../components/Check.vue'
 import Peoples from '../people/components/Peoples.vue'
 import People from '../people/components/Peoples.vue'
 import Scroll from '../../components/Scroll.vue'
-import { useBaseStore } from '@/store/pinia'
+import { useBaseStore, useChatStore } from '@/store/pinia'
 
-import { computed, onMounted, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { useNav } from '@/utils/hooks/useNav.js'
-import { _checkImgUrl, _sleep, cloneDeep } from '@/utils'
+import { _checkImgUrl, _sleep, _time, cloneDeep } from '@/utils'
 import { useScroll } from '@/utils/hooks/useScroll'
+import config from '@/config'
 
 defineOptions({
   name: 'Message'
 })
 
+// 获取 token
+const token = window.localStorage.getItem('token')
+
+// 将 token 添加到 WebSocket 连接的 URL 查询参数中
+const wsServerIp = `${config.baseUrl.replace('http', 'ws')}/message/ws?token=${token}`
+let websocket = null
+
+const chatStore = useChatStore()
 const mainScroll = useScroll()
 const store = useBaseStore()
 const nav = useNav()
@@ -455,16 +470,66 @@ const data = reactive({
   text: 'AAAAAAAAA、BBBBBBBBBBBBB、CCCCCCCC',
   searchFriends: [],
   recommend: [],
-  moreChat: []
+  users: store.friends.all,
+  moreChat: [],
+  all_message: chatStore.all_messages
 })
 
-onMounted(() => {
-  console.log('create')
+// 初始化 WebSocket 连接
+const initWebSocket = () => {
+  websocket = new WebSocket(wsServerIp)
+  chatStore.ws = websocket
+  // WebSocket 事件监听
+  websocket.onopen = () => {
+    console.log('Connected to WebSocket server.')
+  }
+  websocket.onmessage = (event) => {
+    // console.log('收到消息:', event.data)
+    const recvMsg = JSON.parse(event.data)
+    // console.log('recvMessage:', recvMsg)
+    if (!(recvMsg.code === 2000)) {
+      if (Array.isArray(data.all_message[String(recvMsg.rx_uid)])) {
+        data.all_message[String(recvMsg.tx_uid)] = [
+          ...data.all_message[String(recvMsg.tx_uid)],
+          { ...recvMsg, status: 'received' }
+        ]
+      } else {
+        data.all_message[String(recvMsg.tx_uid)] = []
+        data.all_message[String(recvMsg.tx_uid)] = [
+          ...data.all_message[String(recvMsg.tx_uid)],
+          { ...recvMsg, status: 'received' }
+        ]
+      }
+    }
+  }
+  websocket.onclose = () => {
+    // alert('与服务器连接断开！')
+  }
+  websocket.onerror = () => {
+    // alert('发生错误，请检查连接！')
+  }
+}
+
+function handleNavigation(item) {
+  console.log('uid:', item.uid)
+  chatStore.setChatObject(item)
+  // 执行导航
+  nav('/message/chat')
+}
+
+onMounted(async () => {
+  await chatStore.init()
+  data.all_message = chatStore.all_messages
   data.recommend = cloneDeep(store.friends.all)
-  data.recommend.map((v) => {
+  // data.recommend.map((v) => {
+  //   v.type = -2
+  // })
+  Object.values(data.recommend).forEach((v) => {
     v.type = -2
   })
-  data.moreChat = cloneDeep(store.friends.all.slice(0, 3))
+  // data.moreChat = cloneDeep(store.friends.all.slice(0, 3))
+  data.moreChat = cloneDeep(Object.values(store.friends.all).slice(0, 3))
+  initWebSocket() // 初始化 WebSocket
 })
 
 const selectFriends = computed(() => {
@@ -508,6 +573,12 @@ async function loadRecommendData() {
   })
   data.recommend = data.recommend.concat(temp)
 }
+
+onBeforeUnmount(() => {
+  if (websocket) {
+    websocket.close() // 页面卸载时关闭 WebSocket
+  }
+})
 </script>
 <style scoped lang="less">
 @import '../../assets/less/index';

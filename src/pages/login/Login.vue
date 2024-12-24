@@ -26,6 +26,8 @@
         >其他手机号码登录
       </dy-button>
 
+      <dy-button :active="false" type="white" @click="nav('/register')">手机号码注册 </dy-button>
+
       <div class="protocol" :class="data.showAnim ? 'anim-bounce' : ''">
         <Tooltip style="top: -100%; left: -10rem" v-model="data.showTooltip" />
         <div class="left">

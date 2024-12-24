@@ -85,7 +85,7 @@
           <template v-slot="{ item }">
             <div class="goods" @click="nav('/shop/detail', {}, item)">
               <div class="item">
-                <img class="poster" v-lazy="_checkImgUrl('goods/' + item.cover)" />
+                <img class="poster" v-lazy="_checkLocalImgUrl('goods/' + item.cover)" />
                 <div class="bottom">
                   <div class="desc">
                     {{ item.name }}
@@ -114,9 +114,9 @@
 
 <script setup lang="tsx">
 import { useNav } from '@/utils/hooks/useNav'
-import { _checkImgUrl, _no } from '@/utils'
+import { _checkImgUrl, _checkLocalImgUrl, _no } from '@/utils'
 import ScrollList from '@/components/ScrollList.vue'
-import { recommendedShop } from '@/api/user'
+import { recommendedShop } from '@/api/shop'
 import WaterfallList from '@/components/WaterfallList.vue'
 
 defineOptions({

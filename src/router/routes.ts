@@ -4,13 +4,12 @@ import Test4 from '../pages/test/Test4.vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
-  // {path: '/', redirect: '/attention'},
-  { path: '/', redirect: '/home' },
+  { path: '/', redirect: '/login' },
   { path: '/test', component: Test },
   { path: '/test4', component: Test4 },
 
   { path: '/publish', component: () => import('@/pages/home/Publish.vue') },
-
+  { path: '/upload', component: () => import('@/pages/home/Upload.vue') },
   { path: '/home', component: Home },
   { path: '/home/music', component: () => import('@/pages/home/Music.vue') },
   {
@@ -170,7 +169,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/people/FollowAndFans.vue')
   },
 
-  // {path: '/service-protocol', component: ServiceProtocol},
+  { path: '/service-protocol', component: () => import('@/pages/other/ServiceProtocol.vue') },
   {
     path: '/address-list',
     component: () => import('@/pages/people/AddressList.vue')
@@ -185,7 +184,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/message/SetRemark.vue')
   },
 
-  // {path: '/login', component: Login},
+  { path: '/register', component: () => import('@/pages/login/Register.vue') },
   { path: '/login', component: () => import('@/pages/login/Login.vue') },
   {
     path: '/login/other',

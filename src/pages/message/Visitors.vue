@@ -18,11 +18,7 @@
           <div class="header">
             <div class="wrapper">
               <img src="../../assets/img/icon/message/display2.webp" alt="" class="icon1" />
-              <img
-                :src="_checkImgUrl(store.userinfo.cover_url[0].url_list[0])"
-                alt=""
-                class="icon2"
-              />
+              <img :src="_checkImgUrl(store.userinfo.avatar_small)" alt="" class="icon2" />
               <img src="../../assets/img/icon/message/display1.webp" alt="" class="icon3" />
             </div>
           </div>

@@ -13,7 +13,7 @@
     </div>
     <img
       class="music"
-      :src="item.music?.cover_thumb.url_list[0]"
+      :src="_checkImgUrl(item.author?.avatar_small)"
       :style="style"
       v-click="
         () =>
@@ -30,6 +30,7 @@ import { inject, onMounted } from 'vue'
 import bus, { EVENT_KEY } from '@/utils/bus'
 import { Icon } from '@iconify/vue'
 import { useClick } from '@/utils/hooks/useClick'
+import { _checkImgUrl } from '@/utils'
 
 const isPlaying = inject<boolean>('isPlaying')
 const isMuted = inject('isMuted')

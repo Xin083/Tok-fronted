@@ -1,7 +1,7 @@
 <template>
   <div class="posters">
     <div class="poster-item" :key="index" v-for="(i, index) in list" @click="goDetail(index)">
-      <img class="poster" v-lazy="_checkImgUrl(i.video.cover.url_list[0])" alt="" />
+      <img class="poster" v-lazy="_checkImgUrl(i.video.cover)" alt="" />
       <template v-if="mode === 'normal'">
         <div class="num">
           <Icon icon="icon-park-outline:like" />
@@ -47,6 +47,7 @@ defineOptions({
 
 function goDetail(index) {
   store.routeData = cloneDeep({ list: props.list, index })
+  console.log('store:', store.routeData)
   nav.push({ path: '/video-detail' })
 }
 
