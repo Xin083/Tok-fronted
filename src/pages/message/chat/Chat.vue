@@ -264,16 +264,20 @@ const data = reactive({
 })
 
 onMounted(() => {
-  msgWrapper.value
-    .querySelectorAll('img')
-    .forEach((item) => item.addEventListener('load', scrollBottom))
-  scrollBottom()
+  if (msgWrapper.value) {
+    msgWrapper.value
+      .querySelectorAll('img')
+      .forEach((item) => item.addEventListener('load', scrollBottom))
+    scrollBottom()
+  }
 })
 
 onUnmounted(() => {
-  msgWrapper.value
-    .querySelectorAll('img')
-    .forEach((item) => item.removeEventListener('load', scrollBottom))
+  if (msgWrapper.value) {
+    msgWrapper.value
+      .querySelectorAll('img')
+      .forEach((item) => item.removeEventListener('load', scrollBottom))
+  }
 })
 
 // 发送消息
