@@ -90,7 +90,7 @@ export default {
 
 .button {
   color: white;
-  height: 40rem;
+  height: 55rem;
   line-height: 40rem;
   //width: 100%;
   font-size: 14rem;

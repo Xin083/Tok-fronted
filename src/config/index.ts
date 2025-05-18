@@ -1,7 +1,7 @@
 export default {
-  baseUrl: 'http://10.156.200.20:22001',
+  baseUrl: 'http://127.0.0.1:22001',
   imgPath: '/imgs/',
-  filePreview: 'http://10.156.200.20/static/uploads/'
+  filePreview: 'http://127.0.0.1/static/uploads/'
 }
 const BASE_URL_MAP = {
   DEV: '',
@@ -9,7 +9,7 @@ const BASE_URL_MAP = {
   // GP_PAGES: '/dist',
   GP_PAGES: '',
   GITEE_PAGES: '/douyin',
-  UNI: 'http://10.156.200.20'
+  UNI: 'http://127.0.0.1'
 }
 
 export const IS_SUB_DOMAIN = ['GITEE_PAGES', 'GP_PAGES'].includes(import.meta.env.VITE_ENV)

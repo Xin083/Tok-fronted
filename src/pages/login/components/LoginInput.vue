@@ -1,67 +1,97 @@
 <template>
-  <div>
-    <div class="input-number" v-if="type === 'phone'">
+  <div
+    class="input-number"
+    :class="{
+      'input-phone': type === 'phone',
+      'input-password': type === 'password',
+      'input-code': type === 'code'
+    }"
+  >
+    <!-- 手机号输入框 -->
+    <template v-if="type === 'phone'">
       <div class="left">
         <span>+86</span>
-        <div class="arrow"></div>
       </div>
-      <div class="right flex1">
+      <div class="right flex1" style="position: relative">
         <input
-          @click="isTyping = true"
-          @blur="delaySetTypingFalse"
-          :autofocus="autofocus"
           v-model="value"
           type="text"
           :placeholder="placeholder"
+          @input="onInput"
+          @focus="isTyping = true"
+          @blur="delaySetTypingFalse"
+          :autofocus="autofocus"
         />
         <img
           v-if="value && isTyping"
           src="../../../assets/img/icon/login/close-full-gray.png"
           alt=""
-          @click="value = ''"
+          class="clear-icon"
+          @mousedown.prevent="value = ''"
         />
       </div>
-    </div>
-    <div class="input-number" v-if="type === 'password'">
-      <div class="right flex1">
+    </template>
+
+    <!-- 密码输入框 -->
+    <template v-else-if="type === 'password'">
+      <div class="left">
+        <span @click="showPwd = !showPwd">
+          <img
+            v-if="showPwd"
+            src="../../../assets/img/icon/login/密码显示.svg"
+            alt="隐藏密码"
+            class="eye-icon"
+          />
+          <img
+            v-else
+            src="../../../assets/img/icon/login/密码隐藏.svg"
+            alt="显示密码"
+            class="eye-icon"
+          />
+        </span>
+      </div>
+      <div class="right flex1" style="position: relative">
         <input
-          @click="isTyping = true"
-          @blur="delaySetTypingFalse"
-          :autofocus="autofocus"
           v-model="value"
-          type="password"
-          autocomplete="new-password"
+          :type="showPwd ? 'text' : 'password'"
           :placeholder="placeholder"
+          @focus="isTyping = true"
+          @blur="delaySetTypingFalse"
+          :autofocus="autofocus"
         />
         <img
           v-if="value && isTyping"
           src="../../../assets/img/icon/login/close-full-gray.png"
           alt=""
-          @click="value = ''"
+          class="clear-icon"
+          @mousedown.prevent="value = ''"
         />
       </div>
-    </div>
-    <div class="input-number" v-if="type === 'code'">
-      <div class="left no-border flex1">
+    </template>
+
+    <!-- 验证码输入框 -->
+    <template v-else-if="type === 'code'">
+      <div class="right flex1" style="position: relative">
         <input
-          @click="isTyping = true"
-          @blur="delaySetTypingFalse"
-          :autofocus="autofocus"
           v-model="value"
           type="text"
           :placeholder="placeholder"
+          @focus="isTyping = true"
+          @blur="delaySetTypingFalse"
+          :autofocus="autofocus"
         />
         <img
           v-if="value && isTyping"
           src="../../../assets/img/icon/login/close-full-gray.png"
           alt=""
-          @click="value = ''"
+          class="clear-icon"
+          @mousedown.prevent="value = ''"
         />
+        <span class="countdown" :class="isSendVerificationCode && 'disabled'" @click="send">{{
+          verificationCodeBtnText
+        }}</span>
       </div>
-      <div class="right" @click="send">
-        <span :class="isSendVerificationCode && 'disabled'">{{ verificationCodeBtnText }}</span>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 <script>
@@ -96,7 +126,9 @@ export default {
   data() {
     return {
       isTyping: false,
-      verificationCodeBtnText: 60
+      verificationCodeBtnText: 60,
+      showPwd: false,
+      showTooltip: false
     }
   },
   computed: {
@@ -138,99 +170,96 @@ export default {
       if (!this.isSendVerificationCode) {
         this.$emit('send')
       }
+    },
+    onInput() {
+      // Implementation of onInput method
     }
   }
 }
 </script>
-
 <style scoped lang="less">
 @import '../../../assets/less/index';
 
 .input-number {
   display: flex;
-  background: whitesmoke;
-  padding: 15rem 10rem;
+  align-items: center;
+  background: #f6f6f6;
+  border-radius: 12px;
+  padding: 16rem 15rem;
   font-size: 14rem;
+  margin-bottom: 15rem;
 
   .left {
     display: flex;
     align-items: center;
     margin-right: 10rem;
     padding-right: 10rem;
-    position: relative;
-
-    &.no-border {
-      &::before {
-        content: '';
-        display: none;
-      }
-    }
-
-    &.flex1 {
-      flex: 1;
-      margin-right: 0;
-      padding-right: 0;
-    }
-
-    img {
-      top: 50%;
-      transform: translateY(-50%);
-      right: 10rem;
-      position: absolute;
-      height: 15rem;
-    }
-
-    .arrow {
-      margin-top: 4rem;
-      margin-left: 5rem;
-      width: 0;
-      height: 0;
-      border: 4rem solid transparent;
-      border-top: 5rem solid black;
-    }
-
-    &::before {
-      content: ' ';
-      position: absolute;
-      width: 1px;
-      height: 8rem;
-      top: 4px;
-      right: 0;
-      background: gainsboro;
-    }
   }
 
   .right {
-    //background: red;
-    position: relative;
-
-    &.flex1 {
-      flex: 1;
-    }
-
-    img {
-      top: 50%;
-      transform: translateY(-50%);
-      right: 10rem;
-      position: absolute;
-      height: 15rem;
-    }
-
-    .disabled {
-      color: var(--second-text-color);
-    }
+    flex: 1;
+    display: flex;
+    align-items: center;
   }
 
   input {
-    width: 90%;
-    outline: none;
+    width: 100%;
     border: none;
-    background: whitesmoke;
-    caret-color: red;
-
-    &[type='password'] {
-      //letter-spacing: 10rem;
-    }
+    background: transparent;
+    font-size: 15rem;
+    outline: none;
   }
+}
+
+.code-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  height: 100%;
+}
+
+.countdown {
+  margin-left: 10px;
+  color: #ff4d6a;
+  cursor: pointer;
+  min-width: 60px;
+  text-align: right;
+}
+
+.countdown.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.input-number:focus-within {
+  border: 1px solid #ff4d6a;
+  box-shadow: 0 0 0 3px #ff4d6a22;
+  background: whitesmoke;
+}
+
+.clear-icon {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  object-fit: contain;
+  z-index: 2;
+}
+
+.eye-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  cursor: pointer;
+  object-fit: contain;
+}
+
+.input-code .clear-icon {
+  right: 20px; /* 你可以根据实际效果调整这个值 */
 }
 </style>

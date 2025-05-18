@@ -7,7 +7,7 @@
     </BaseHeader>
     <div class="content">
       <div class="desc">
-        <div class="title">登录看朋友内容</div>
+        <div class="title">登陆后，体验完整功能</div>
         <div class="sub-title">未注册的手机号验证通过后将自动注册</div>
       </div>
 
@@ -18,7 +18,7 @@
       </div>
 
       <div class="protocol" :class="showAnim ? 'anim-bounce' : ''">
-        <Tooltip style="top: -150%; left: -10rem" v-model="showTooltip" />
+        <Tooltip style="top: -185%; left: -10rem" v-model="showTooltip" />
         <div class="left">
           <Check v-model="isAgree" />
         </div>
@@ -30,10 +30,9 @@
             >用户协议</span
           >
           和
-          <span class="link" @click="$router.push('/service-protocol', { type: '“抖音”隐私政策' })"
-            >隐私政策</span
-          >
-          ，同时登录并使用抖音火山版（原“火山小视频”）和抖音
+          <span class="link" @click="$router.push('/service-protocol', { type: '“抖音”隐私政策' })">
+            隐私政策
+          </span>
         </div>
       </div>
 
@@ -41,7 +40,7 @@
         type="primary"
         :loading="loading"
         :active="false"
-        :disabled="phone.length < 10"
+        :disabled="phone.length < 2"
         @click="getCode"
       >
         获取短信验证码
@@ -124,6 +123,16 @@ export default {
       if (res) {
         this.isOtherLogin = true
       }
+    },
+    formatPhone() {
+      let val = this.phone.replace(/\D/g, '').slice(0, 11)
+      // 分段显示 198 7918 7083
+      if (val.length > 3 && val.length <= 7) {
+        val = val.replace(/(\d{3})(\d+)/, '$1 $2')
+      } else if (val.length > 7) {
+        val = val.replace(/(\d{3})(\d{4})(\d+)/, '$1 $2 $3')
+      }
+      this.phone = val
     }
   }
 }
@@ -194,6 +203,7 @@ export default {
       font-size: 14rem;
       display: flex;
     }
+
     .block-dialog {
       color: black;
 

@@ -7,35 +7,27 @@
     </BaseHeader>
     <div class="content">
       <div class="desc">
-        <div class="title">手机号密码登录</div>
+        <h6>登陆后，体验完整功能</h6>
+        <div class="sub-title">未注册的手机号验证通过后将自动注册</div>
       </div>
 
       <LoginInput autofocus type="phone" v-model="phone" placeholder="请输入手机号" />
-      <LoginInput
-        autofocus
-        class="mt1r"
-        type="password"
-        v-model="password"
-        placeholder="请输入密码"
-      />
+      <LoginInput autofocus type="password" v-model="password" placeholder="请输入密码" />
 
       <div class="protocol" :class="showAnim ? 'anim-bounce' : ''">
-        <Tooltip style="top: -150%; left: -10rem" v-model="showTooltip" />
+        <Tooltip style="top: -185%; left: -10rem" v-model="showTooltip" />
         <div class="left">
           <Check v-model="isAgree" />
         </div>
         <div class="right">
           已阅读并同意
-          <span
-            class="link"
-            @click="$router.push('/service-protocol', { type: '“抖音”用户服务协议' })"
+          <span class="link" @click="$router.push('/service-protocol', { type: '用户服务协议' })"
             >用户协议</span
           >
           和
-          <span class="link" @click="$router.push('/service-protocol', { type: '“抖音”隐私政策' })"
+          <span class="link" @click="$router.push('/service-protocol', { type: '隐私政策' })"
             >隐私政策</span
           >
-          ，同时登录并使用抖音火山版（原“火山小视频”）和抖音
         </div>
       </div>
 
@@ -87,7 +79,8 @@ export default {
       phone: '',
       password: '',
       code: '',
-      notice: ''
+      notice: '',
+      passwordVisible: false
     }
   },
   computed: {
@@ -132,6 +125,16 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    formatPhone() {
+      let val = this.phone.replace(/\D/g, '').slice(0, 11)
+      // 分段显示 198 7918 7083
+      if (val.length > 3 && val.length <= 7) {
+        val = val.replace(/(\d{3})(\d+)/, '$1 $2')
+      } else if (val.length > 7) {
+        val = val.replace(/(\d{3})(\d{4})(\d+)/, '$1 $2 $3')
+      }
+      this.phone = val
     }
   }
 }
@@ -153,14 +156,14 @@ export default {
   background: white;
 
   .content {
-    padding: 60rem 30rem;
+    padding: 85rem 35rem;
 
     .desc {
-      margin-bottom: 60rem;
-      margin-top: 120rem;
-      display: flex;
-      align-items: center;
-      flex-direction: column;
+      text-align: right; // 居右
+      font-size: 35rem; // 放大字体
+      margin-top: 40rem; // 往下移动
+      margin-bottom: 0rem; //  文本与数据框距离
+      font-weight: bold; // 可选：加粗
 
       .title {
         margin-bottom: 20rem;
@@ -175,7 +178,12 @@ export default {
 
       .sub-title {
         font-size: 12rem;
+        margin-top: -20rem;
+        margin-bottom: 0rem;
         color: var(--second-text-color);
+        font-weight: normal;
+        position: relative;
+        top: -20rem;
       }
     }
 
@@ -200,6 +208,13 @@ export default {
       position: relative;
       font-size: 14rem;
       display: flex;
+    }
+
+    dy-button,
+    .button {
+      width: 100%;
+      margin-bottom: 5rem;
+      margin-top: 30rem;
     }
   }
 }

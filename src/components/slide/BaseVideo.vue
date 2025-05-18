@@ -3,7 +3,7 @@
     <Loading v-if="state.loading" style="position: absolute" />
     <!--    <video :src="item.video + '?v=123'"-->
     <video
-      :src="item.video.play_addr.url_list[2]"
+      :src="item.video.play_addr.url_list[0]"
       :poster="poster"
       ref="videoEl"
       :muted="state.isMuted"

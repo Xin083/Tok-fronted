@@ -23,6 +23,10 @@
     "commit": "git-cz"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
     "@jambonn/vue-lazyload": "1.0.9",
     "axios": "^1.6.8",
     "axios-mock-adapter": "^1.22.0",

@@ -1,16 +1,17 @@
 <template>
   <div class="login">
-    <BaseHeader mode="light" backMode="dark" backImg="close">
+    <BaseHeader mode="light" backMode="dark" backImg="close" @click="nav('/home')">
       <template v-slot:right>
         <span class="f14" @click="nav('/login/help')">帮助与设置</span>
       </template>
     </BaseHeader>
+
     <Loading v-if="data.loading.getPhone" />
+
     <div v-else class="content">
       <div class="desc">
-        <div class="title">登录看朋友内容</div>
-        <div class="phone-number">138****8000</div>
-        <div class="sub-title">认证服务由中国移动提供</div>
+        <h2>登陆后，体验完整功能</h2>
+        <div class="sub-title">未注册的手机号验证通过后将自动注册</div>
       </div>
 
       <dy-button
@@ -22,11 +23,12 @@
       >
         {{ data.loading.login ? '登录中' : '一键登录' }}
       </dy-button>
-      <dy-button :active="false" type="white" @click="nav('/login/other')"
-        >其他手机号码登录
-      </dy-button>
 
-      <dy-button :active="false" type="white" @click="nav('/register')">手机号码注册 </dy-button>
+      <!--      <dy-button :active="false" type="white" @click="nav('/register')">手机号码注册</dy-button>-->
+
+      <dy-button :active="false" type="white" @click="nav('/login/other')"
+        >其他手机号码登录</dy-button
+      >
 
       <div class="protocol" :class="data.showAnim ? 'anim-bounce' : ''">
         <Tooltip style="top: -100%; left: -10rem" v-model="data.showTooltip" />
@@ -44,17 +46,16 @@
           >
           <div>
             以及
-            <span class="link" @click="nav('/service-protocol', { type: '中国移动认证服务协议' })"
-              >《中国移动认证服务条款》</span
+            <span class="link" @click="nav('/service-protocol', { type: '认证服务协议' })"
+              >《认证服务条款》</span
             >
-            ，同时登录并使用抖音火山版（原“火山小视频”）和抖音
           </div>
         </div>
       </div>
 
       <div class="other-login">
         <transition name="fade">
-          <div v-if="data.isOtherLogin" class="icons">
+          <div v-if="data.isOtherLogin && data.isAgree" class="icons">
             <img @click="_no" src="../../assets/img/icon/login/toutiao-round.png" alt="" />
             <img @click="_no" src="../../assets/img/icon/login/qq-round.webp" alt="" />
             <img @click="_no" src="../../assets/img/icon/login/wechat-round.png" alt="" />
@@ -62,11 +63,9 @@
           </div>
         </transition>
       </div>
+
       <transition name="fade">
-        <span
-          v-if="!data.isOtherLogin"
-          class="other-login-text link"
-          @click="data.isOtherLogin = !data.isOtherLogin"
+        <span v-if="!data.isOtherLogin" class="other-login-text link" @click="showOtherLogin"
           >其他方式登录</span
         >
       </transition>
@@ -107,20 +106,32 @@ async function getPhone() {
   data.loading.getPhone = false
 }
 
+function showProtocolTip() {
+  if (!data.showAnim && !data.showTooltip) {
+    data.showAnim = true
+    setTimeout(() => {
+      data.showAnim = false
+      data.showTooltip = true
+    }, 500)
+    setTimeout(() => {
+      data.showTooltip = false
+    }, 3000)
+  }
+}
+
 function login() {
   if (data.isAgree) {
     data.loading.login = true
   } else {
-    if (!data.showAnim && !data.showTooltip) {
-      data.showAnim = true
-      setTimeout(() => {
-        data.showAnim = false
-        data.showTooltip = true
-      }, 500)
-      setTimeout(() => {
-        data.showTooltip = false
-      }, 3000)
-    }
+    showProtocolTip()
+  }
+}
+
+function showOtherLogin() {
+  if (data.isAgree) {
+    data.isOtherLogin = true
+  } else {
+    showProtocolTip()
   }
 }
 </script>

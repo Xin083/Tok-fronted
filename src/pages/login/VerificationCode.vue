@@ -8,7 +8,7 @@
     <div class="content">
       <div class="desc">
         <div class="title">请输入验证码</div>
-        <div class="sub-title">验证码已通过短信发送到+86 13800138000</div>
+        <div class="sub-title">验证码已通过短信发送到+86 xxxxxxxxxx</div>
       </div>
 
       <LoginInput
