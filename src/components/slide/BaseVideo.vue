@@ -3,7 +3,7 @@
     <Loading v-if="state.loading" style="position: absolute" />
     <!--    <video :src="item.video + '?v=123'"-->
     <video
-      :src="item.video.play_addr.url_list[0]"
+      :src="getPlayableUrl(item)"
       :poster="poster"
       ref="videoEl"
       :muted="state.isMuted"
@@ -392,6 +392,15 @@ function touchend(e) {
   setTimeout(() => (state.isMove = false), 1000)
   videoEl.currentTime = state.currentTime
   play()
+}
+
+function getPlayableUrl(item) {
+  if (!item?.video?.play_addr?.url_list) return ''
+  const local = item.video.play_addr.url_list.find((url) => url.startsWith('http://127.0.0.1'))
+  if (local) return local
+  const https = item.video.play_addr.url_list.find((url) => url.startsWith('https://'))
+  if (https) return https
+  return item.video.play_addr.url_list[0] || ''
 }
 </script>
 

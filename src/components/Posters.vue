@@ -47,7 +47,6 @@ defineOptions({
 
 function goDetail(index) {
   store.routeData = cloneDeep({ list: props.list, index })
-  console.log('store:', store.routeData)
   nav.push({ path: '/video-detail' })
 }
 
