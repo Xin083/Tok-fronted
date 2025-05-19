@@ -11,8 +11,8 @@
         <div class="sub-title">未注册的手机号验证通过后将自动注册</div>
       </div>
 
-      <LoginInput autofocus type="phone" v-model="phone" placeholder="请输入手机号" />
-
+      <!--      <LoginInput autofocus type="phone" v-model="phone" placeholder="请输入手机号" />-->
+      <LoginInput autofocus type="phone" v-model="phone" placeholder="请输入邮箱号" />
       <div class="notice" v-if="notice">
         {{ notice }}
       </div>
