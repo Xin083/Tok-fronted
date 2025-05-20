@@ -1,3 +1,80 @@
+<template>
+  <div class="long-video" @dragstart="(e) => _stopPropagation(e)">
+    <ScrollList class="Scroll" v-if="state.show" :api="recommendedLongVideo">
+      <template v-slot="{ list }">
+        <div class="list">
+          <div
+            class="item"
+            @click="nav('/video-detail', {}, { list, index: i })"
+            :class="[
+              i % 9 === 0 && 'big',
+              i % 9 === 0 ? '' : i % 2 === 1 && 'l',
+              i % 9 === 0 ? '' : i % 2 === 0 && 'r'
+            ]"
+            :key="i"
+            v-for="(item, i) in list"
+          >
+            <div class="video-wrapper" v-if="i % 9 === 0">
+              <video
+                muted
+                preload
+                loop
+                x5-video-player-type="h5-page"
+                :x5-video-player-fullscreen="false"
+                :webkit-playsinline="true"
+                :x5-playsinline="true"
+                :playsinline="true"
+                :fullscreen="false"
+                v-is-can-play
+                :poster="_checkImgUrl(item.video.cover.url_list[0])"
+                :src="item.video.play_addr.url_list[0]"
+              ></video>
+              <div class="options">
+                <div class="left"></div>
+                <div class="right">
+                  <div class="option" @click.stop="state.danmu = !state.danmu">
+                    <img v-if="state.danmu" src="@/assets/img/icon/danmu-open.svg" />
+                    <img v-else src="@/assets/img/icon/danmu-close.svg" />
+                  </div>
+                  <div class="option" @click.stop="state.muted = !state.muted">
+                    <Icon v-if="state.muted" icon="charm:sound-mute" />
+                    <Icon v-else icon="akar-icons:sound-on" />
+                  </div>
+                  <div class="option">
+                    <img src="@/assets/img/icon/rotate.svg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <img v-else v-lazy="_checkImgUrl(item.video.cover.url_list[0])" alt="" class="poster" />
+            <div class="duration">{{ _duration(item.duration / 1000) }}</div>
+            <div class="title">
+              {{ item.video_desc }}
+            </div>
+            <div class="bottom">
+              <div class="l">
+                <img
+                  v-lazy="_checkImgUrl(item.author.avatar_small.url_list[0])"
+                  alt=""
+                  class="avatar"
+                />
+                <div class="name">{{ item.author.nickname }}</div>
+              </div>
+              <div class="r">
+                <Icon icon="icon-park-outline:like" />
+                <div class="num">
+                  {{ _formatNumber(item.statistics.digg_count) }}
+                </div>
+              </div>
+            </div>
+            <div>{{ item.video.cover.url_list }}</div>
+          </div>
+        </div>
+      </template>
+    </ScrollList>
+  </div>
+</template>
+
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import { _checkImgUrl, _duration, _formatNumber, _stopPropagation } from '@/utils'
@@ -76,82 +153,6 @@ const vIsCanPlay = {
 
 const nav = useNav()
 </script>
-
-<template>
-  <div class="long-video" @dragstart="(e) => _stopPropagation(e)">
-    <ScrollList class="Scroll" v-if="state.show" :api="recommendedLongVideo">
-      <template v-slot="{ list }">
-        <div class="list">
-          <div
-            class="item"
-            @click="nav('/video-detail', {}, { list, index: i })"
-            :class="[
-              i % 9 === 0 && 'big',
-              i % 9 === 0 ? '' : i % 2 === 1 && 'l',
-              i % 9 === 0 ? '' : i % 2 === 0 && 'r'
-            ]"
-            :key="i"
-            v-for="(item, i) in list"
-          >
-            <div class="video-wrapper" v-if="i % 9 === 0">
-              <video
-                muted
-                preload
-                loop
-                x5-video-player-type="h5-page"
-                :x5-video-player-fullscreen="false"
-                :webkit-playsinline="true"
-                :x5-playsinline="true"
-                :playsinline="true"
-                :fullscreen="false"
-                v-is-can-play
-                :poster="_checkImgUrl(item.video.cover.url_list[0])"
-                :src="item.video.play_addr.url_list[2]"
-              ></video>
-              <div class="options">
-                <div class="left"></div>
-                <div class="right">
-                  <div class="option" @click.stop="state.danmu = !state.danmu">
-                    <img v-if="state.danmu" src="@/assets/img/icon/danmu-open.svg" />
-                    <img v-else src="@/assets/img/icon/danmu-close.svg" />
-                  </div>
-                  <div class="option" @click.stop="state.muted = !state.muted">
-                    <Icon v-if="state.muted" icon="charm:sound-mute" />
-                    <Icon v-else icon="akar-icons:sound-on" />
-                  </div>
-                  <div class="option">
-                    <img src="@/assets/img/icon/rotate.svg" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <img v-else v-lazy="_checkImgUrl(item.video.cover.url_list[0])" alt="" class="poster" />
-            <div class="duration">{{ _duration(item.duration / 1000) }}</div>
-            <div class="title">
-              {{ item.video_desc }}
-            </div>
-            <div class="bottom">
-              <div class="l">
-                <img
-                  v-lazy="_checkImgUrl(item.author.avatar_small.url_list[0])"
-                  alt=""
-                  class="avatar"
-                />
-                <div class="name">{{ item.author.nickname }}</div>
-              </div>
-              <div class="r">
-                <Icon icon="icon-park-outline:like" />
-                <div class="num">
-                  {{ _formatNumber(item.statistics.digg_count) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </ScrollList>
-  </div>
-</template>
 
 <style scoped lang="less">
 .long-video {

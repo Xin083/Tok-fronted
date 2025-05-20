@@ -122,9 +122,7 @@ defineOptions({
 })
 const nav = useNav()
 const router = useRouter()
-
 const baseStore = useBaseStore()
-
 const state = reactive({
   baseIndex: 1,
   navIndex: 4,
