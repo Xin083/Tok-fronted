@@ -2,11 +2,33 @@
   <div
     class="input-number"
     :class="{
+      'input-email': type === 'email',
       'input-phone': type === 'phone',
       'input-password': type === 'password',
       'input-code': type === 'code'
     }"
   >
+    <!-- 邮箱号输入框 -->
+    <template v-if="type === 'email'">
+      <div class="right flex1" style="position: relative">
+        <input
+          v-model="value"
+          type="text"
+          :placeholder="placeholder"
+          @input="onInput"
+          @focus="isTyping = true"
+          @blur="delaySetTypingFalse"
+          :autofocus="autofocus"
+        />
+        <img
+          v-if="value && isTyping"
+          src="../../../assets/img/icon/login/close-full-gray.png"
+          alt=""
+          class="clear-icon"
+          @mousedown.prevent="value = ''"
+        />
+      </div>
+    </template>
     <!-- 手机号输入框 -->
     <template v-if="type === 'phone'">
       <div class="left">
@@ -171,8 +193,12 @@ export default {
         this.$emit('send')
       }
     },
-    onInput() {
-      // Implementation of onInput method
+    onInput(e) {
+      if (this.type === 'phone') {
+        // 用事件参数获取最新输入值
+        let val = e.target.value.replace(/\D/g, '').slice(0, 11)
+        this.$emit('update:modelValue', val)
+      }
     }
   }
 }

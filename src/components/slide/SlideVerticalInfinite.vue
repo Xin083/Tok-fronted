@@ -1,3 +1,18 @@
+<template>
+  <div class="slide slide-infinite">
+    <Loading v-if="props.loading && props.list.length === 0" />
+    <div
+      class="slide-list flex-direction-column"
+      ref="slideListEl"
+      @pointerdown.prevent="touchStart"
+      @pointermove.prevent="touchMove"
+      @pointerup.prevent="touchEnd"
+    >
+      <slot></slot>
+    </div>
+  </div>
+</template>
+
 <script setup lang="tsx">
 import { createApp, onMounted, reactive, ref, render as vueRender, watch } from 'vue'
 import {
@@ -367,18 +382,3 @@ function canNext(state, isNext: boolean) {
   )
 }
 </script>
-
-<template>
-  <div class="slide slide-infinite">
-    <Loading v-if="props.loading && props.list.length === 0" />
-    <div
-      class="slide-list flex-direction-column"
-      ref="slideListEl"
-      @pointerdown.prevent="touchStart"
-      @pointermove.prevent="touchMove"
-      @pointerup.prevent="touchEnd"
-    >
-      <slot></slot>
-    </div>
-  </div>
-</template>

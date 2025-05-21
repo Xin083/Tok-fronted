@@ -11,7 +11,9 @@
     <div v-else class="content">
       <div class="desc">
         <h2>登陆后，体验完整功能</h2>
-        <div class="sub-title">未注册的手机号验证通过后将自动注册</div>
+        <!--        <div class="sub-title">未注册的手机号验证通过后将自动注册</div>-->
+        <div class="sub-title">未注册的邮箱验证通过后将自动注册</div>
+        <div class="sub-title">仅支持邮箱验证码登陆注册</div>
       </div>
 
       <dy-button
@@ -26,9 +28,10 @@
 
       <!--      <dy-button :active="false" type="white" @click="nav('/register')">手机号码注册</dy-button>-->
 
-      <dy-button :active="false" type="white" @click="nav('/login/other')"
-        >其他手机号码登录</dy-button
-      >
+      <dy-button :active="false" type="white" @click="handleEmailLoginClick">
+        邮箱验证码登录
+        <!--        其他手机号码登录-->
+      </dy-button>
 
       <div class="protocol" :class="data.showAnim ? 'anim-bounce' : ''">
         <Tooltip style="top: -100%; left: -10rem" v-model="data.showTooltip" />
@@ -65,7 +68,7 @@
       </div>
 
       <transition name="fade">
-        <span v-if="!data.isOtherLogin" class="other-login-text link" @click="showOtherLogin"
+        <span v-if="!data.isOtherLogin" class="other-login-text link" @click="showEmailLogin"
           >其他方式登录</span
         >
       </transition>
@@ -115,7 +118,7 @@ function showProtocolTip() {
     }, 500)
     setTimeout(() => {
       data.showTooltip = false
-    }, 3000)
+    }, 1000)
   }
 }
 
@@ -127,9 +130,17 @@ function login() {
   }
 }
 
-function showOtherLogin() {
+function showEmailLogin() {
   if (data.isAgree) {
     data.isOtherLogin = true
+  } else {
+    showProtocolTip()
+  }
+}
+
+function handleEmailLoginClick() {
+  if (data.isAgree) {
+    nav('/login/email')
   } else {
     showProtocolTip()
   }

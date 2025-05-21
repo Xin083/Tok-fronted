@@ -187,6 +187,10 @@ const routes: RouteRecordRaw[] = [
   { path: '/register', component: () => import('@/pages/login/Register.vue') },
   { path: '/login', component: () => import('@/pages/login/Login.vue') },
   {
+    path: '/login/email',
+    component: () => import('@/pages/login/EmailLogin.vue')
+  },
+  {
     path: '/login/other',
     component: () => import('@/pages/login/OtherLogin.vue')
   },
@@ -197,6 +201,10 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login/verification-code',
     component: () => import('@/pages/login/VerificationCode.vue')
+  },
+  {
+    path: '/login/email-verification-code',
+    component: () => import('@/pages/login/EmailVerificationCode.vue')
   },
   {
     path: '/login/retrieve-password',
