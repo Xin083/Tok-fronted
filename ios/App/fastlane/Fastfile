@@ -1,0 +1,14 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS app"
+  lane :build do
+    build_ios_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "development",
+      output_directory: "build",
+      output_name: "App.ipa"
+    )
+  end
+end 

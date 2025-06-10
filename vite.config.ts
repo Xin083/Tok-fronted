@@ -6,6 +6,7 @@ import { Plugin as importToCDN } from 'vite-plugin-cdn-import'
 import { fileURLToPath, URL } from 'node:url'
 import { getLastCommit } from 'git-last-commit'
 import VueMacros from 'unplugin-vue-macros/vite'
+import uni from '@dcloudio/vite-plugin-uni'
 
 const lifecycle = process.env.npm_lifecycle_event
 
@@ -24,15 +25,16 @@ export default defineConfig((): Promise<UserConfig> => {
           VueMacros({
             plugins: {
               vue: Vue(),
-              vueJsx: VueJsx() // if needed
+              vueJsx: VueJsx()
             }
-            // betterDefine: true,
-            // reactivityTransform: {
-            //   exclude: [/node_modules/, /jQuery\.js/]
-            // }
           }),
-          // Vue(),
-          // VueJsx(),
+          uni({
+            vueOptions: {
+              compilerOptions: {
+                isCustomElement: (tag) => tag.startsWith('uni-')
+              }
+            }
+          }),
           lifecycle === 'report' ? (visualizer({ open: false }) as any as PluginOption) : null,
           importToCDN({
             modules: [
