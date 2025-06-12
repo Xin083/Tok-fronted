@@ -41,6 +41,8 @@
 import LoginInput from './components/LoginInput.vue'
 import { onMounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useBaseStore, useChatStore } from '@/store/pinia'
+import { recommendedVideo } from '@/api/videos'
 
 defineOptions({
   name: 'EmailVerificationCode'
@@ -50,6 +52,9 @@ const router = useRouter()
 const route = useRoute()
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const baseStore = useBaseStore()
+const chatStore = useChatStore()
 
 // 从路由参数获取邮箱
 const email = computed(() => (route.query.email as string) || '')
@@ -128,11 +133,24 @@ async function login() {
     const result = await response.json()
     if (result.code === 200) {
       // 登录成功，存储token
-      localStorage.setItem('token', result.data.token)
-      // 存储用户信息
-      localStorage.setItem('userInfo', JSON.stringify(result.data.user_info))
-      // 跳转到首页
-      router.push('/home')
+      baseStore.setToken(result.data.token)
+      baseStore.login_id = result.data.uid
+
+      // 等待数据初始化完成
+      await Promise.all([
+        baseStore.init(),
+        chatStore.init(),
+        // 预加载视频数据
+        recommendedVideo({ start: 0, pageSize: 15 }).then((res) => {
+          if (res.success) {
+            baseStore.videoList = res.data.list
+            baseStore.videoTotal = res.data.total
+          }
+        })
+      ])
+
+      // 数据加载完成后再跳转
+      await router.push('/home')
     } else {
       throw new Error(result.message || '登录失败')
     }
