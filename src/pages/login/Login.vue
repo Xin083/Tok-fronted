@@ -75,7 +75,7 @@
     </div>
     <div style="text-align: center; margin-top: 20px; font-size: 12rem">
       <a
-        href="http://api.yunduo.me/build/apk/app-debug.apk"
+        href="https://api.yunduo.me/build/apk/android-app-debug.apk"
         target="_blank"
         style="color: #1890ff; text-decoration: underline"
         >安装移动端应用</a
