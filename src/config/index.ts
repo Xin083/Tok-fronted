@@ -1,8 +1,15 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 export default {
-  baseUrl: 'http://127.0.0.1:22001',
+  baseUrl: API_BASE_URL,
   imgPath: '/imgs/',
-  filePreview: 'http://127.0.0.1/static/uploads/'
+  filePreview: `${API_BASE_URL}/static/uploads/`
 }
+// export default {
+//   baseUrl: 'http://127.0.0.1:22001',
+//   imgPath: '/imgs/',
+//   filePreview: 'http://127.0.0.1/static/uploads/'
+// }
 const BASE_URL_MAP = {
   DEV: '',
   PROD: '',

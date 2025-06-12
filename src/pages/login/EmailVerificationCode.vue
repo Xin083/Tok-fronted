@@ -49,6 +49,8 @@ defineOptions({
 const router = useRouter()
 const route = useRoute()
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // 从路由参数获取邮箱
 const email = computed(() => (route.query.email as string) || '')
 const maskedEmail = computed(() => {
@@ -68,7 +70,7 @@ async function sendCode() {
   try {
     data.loading = true
     // 发起发送验证码请求
-    const response = await fetch('http://localhost:22001/base/email-login', {
+    const response = await fetch(`${API_BASE_URL}/base/email-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -107,7 +109,7 @@ async function login() {
   try {
     data.loading = true
     // 发起邮箱验证码登录请求
-    const response = await fetch('http://localhost:22001/base/email-login', {
+    const response = await fetch(`${API_BASE_URL}/base/email-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

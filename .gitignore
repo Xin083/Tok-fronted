@@ -29,4 +29,3 @@ coverage
 
 *.tsbuildinfo
 android/app/build/
-android/app/build/intermediates/apk/debug/
