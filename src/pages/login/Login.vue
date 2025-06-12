@@ -90,6 +90,7 @@ import Loading from '../../components/Loading.vue'
 import { onMounted, reactive } from 'vue'
 import { useNav } from '@/utils/hooks/useNav'
 import { _no, _sleep } from '@/utils'
+import { useBaseStore } from '@/store/pinia'
 
 defineOptions({
   name: 'login'
@@ -108,6 +109,13 @@ const data = reactive({
 })
 
 onMounted(() => {
+  const baseStore = useBaseStore()
+  // 检查token，如果存在则跳转到首页
+  const token = window.localStorage.getItem('token') || baseStore.token
+  if (token) {
+    nav('/home')
+    return
+  }
   getPhone()
 })
 
