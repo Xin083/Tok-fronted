@@ -2,11 +2,12 @@ import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.leixin.xtok', // 这里填你自己的唯一包名
-  appName: 'X-Tok', // 这里填你的应用名称
+  appName: 'Tikshop', // 这里填你的应用名称
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
-    androidScheme: 'https'
+    androidScheme: 'http',
+    cleartext: true
   },
   ios: {
     contentInset: 'always',

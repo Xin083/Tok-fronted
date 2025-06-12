@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tikshop</string>
+    <string name="title_activity_main">Tikshop</string>
+    <string name="package_name">com.leixin.xtok</string>
+    <string name="custom_url_scheme">com.leixin.xtok</string>
+</resources>

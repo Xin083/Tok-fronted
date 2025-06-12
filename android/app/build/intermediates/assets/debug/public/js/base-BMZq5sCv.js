@@ -1,1 +1,0 @@
-import{r as t}from"./common-DCPMJxUF.js";function s(r,e){return t({url:"/base/register",method:"post",params:r,data:e})}function n(r,e){return t({url:"/base/login",method:"post",params:r,data:e})}export{n as l,s as r};
